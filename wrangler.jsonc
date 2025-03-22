@@ -1,7 +1,7 @@
 {
-  "name": "<TBD>",
+  "name": "ebtp",
   "main": "src/index.js",
-  "compatibility_date": "<TBD>",
+  "compatibility_date": "2025-03-10",
   "compatibility_flags": [
     "nodejs_compat"
   ],
