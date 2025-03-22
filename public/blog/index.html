@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>EBTP default blog page</title>
+	</head>
+	<body>
+		<article>loading...</article>
+	</body>
+    <script type="module">
+		import "/static/bsky_comment.js";
+		let url = new URL(location.href)
+		let [_, id, rkey] = url.pathname.slice(1).split('/')
+		let response = await fetch(`/data?id=${id}&rkey=${rkey}`)
+		let data = await response.json()
+
+		if (data.error) throw Error(data.message)
+
+		document.querySelector('title').innerText = data?.meta?.title
+		document.querySelector('article').innerHTML = data.blog
+		let postAt = `at://${data.profile.did}/app.bsky.feed.post/${rkey}`
+		let ele = document.createElement('bluesky-comments')
+		ele.setAttribute('url', postAt)
+		document.querySelector('body').appendChild(ele)
+    </script>
+</html>

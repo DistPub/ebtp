@@ -1,11 +1,12 @@
 export default {
 	async fetch(request, env, ctx) {
 		const url = new URL(request.url);
+
+		if (/\/blog\/.+?\/.+?/.test(url.pathname)) {
+			url.pathname = '/blog'
+			return env.ASSETS.fetch(new Request(url.toString()));
+		}
 		switch (url.pathname) {
-			case '/message':
-				return new Response('Hello, World!');
-			case '/random':
-				return new Response(crypto.randomUUID());
 			case '/go':
 				return await go(url.searchParams.get('u'))
 			case '/data':
