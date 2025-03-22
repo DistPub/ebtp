@@ -8,15 +8,51 @@ export default {
 				return new Response(crypto.randomUUID());
 			case '/go':
 				return await go(url.searchParams.get('u'))
+			case '/data':
+				let data = await getData(url.searchParams.get('id'), url.searchParams.get('rkey'))
+				return new Response(JSON.stringify(data), {
+					headers: {
+						'content-type': 'application/json'
+					}
+				})
 			default:
 				return new Response('Not Found', { status: 404 });
 		}
 	},
 };
 
+async function getData(id, rkey) {
+	if (!id || !rkey) return { error: 'BadParams', message: `bad params`}
+	let profile = await getProfile(id)
+	let {did, handle} = profile
+	let instance = await resolveInstance(did)
+
+	let params = {repo: did, collection: 'app.bsky.feed.post', rkey}
+	let result = await xrpc(instance, 'com.atproto.repo.getRecord', { params })
+	let post = result.value
+	let blog_blob = post?.embed?.external?.blog
+	if (!blog_blob) return { error: 'NotEBTP', message: 'not found embed blog in the post'}
+
+	params = {
+		did,
+		cid: blog_blob.ref.$link
+	}
+	let blog = await xrpc(instance, 'com.atproto.sync.getBlob', {params})
+	let meta = post?.embed?.external?.meta
+	return {profile, meta, blog}
+}
+
+// go service
+
+async function getProfile(id) {
+	return await xrpc('public.api.bsky.app', 'app.bsky.actor.getProfile', {params: {actor: id}})
+}
+
 async function go(postAt) {
-	let [did, _, rkey] = postAt.slice('at://'.length).split('/')
-	let [instance, handle] = await resolveInstanceHandle(did)
+	let [id, _, rkey] = postAt.slice('at://'.length).split('/')
+	let profile = await getProfile(id)
+	let {did, handle} = profile
+	let instance = await resolveInstance(did)
 	let gate = await currentEBTPGate(instance, did)
 	let uri = `/blog/${handle}/${rkey}`
 	if (gate) {
@@ -40,7 +76,7 @@ function convertStringToTemplate(templateString, context) {
 	});
 }
 
-async function resolveInstanceHandle(at_did) {
+async function resolveInstance(at_did) {
 	let did_uri = undefined
 	if (at_did.startsWith('did:plc:')) {
 		did_uri = `https://plc.directory/${at_did}`
@@ -50,26 +86,13 @@ async function resolveInstanceHandle(at_did) {
 
 	let response = await fetch(did_uri)
 	let result = await response.json()
-
-	let instance = undefined
-	let handle = undefined
-
 	for (let service of result.service) {
 		if (service.id === '#atproto_pds') {
 			let endpoint = new URL(service.serviceEndpoint)
-			instance = endpoint.host
-			break
+			return endpoint.host
 		}
 	}
-
-	for (let aka of result.alsoKnownAs) {
-		handle = aka.slice('at://'.length)
-		break
-	}
-
-	if (!instance) throw Error('failed resolve #atproto_pds service')
-	if (!handle) throw Error('failed resolve aka handle')
-	return [instance, handle]
+	throw Error('failed resolve #atproto_pds service')
 }
 
 async function currentEBTPGate(instance, did) {
