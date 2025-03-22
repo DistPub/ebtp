@@ -11,5 +11,8 @@
   },
   "observability": {
     "enabled": true
-  }
+  },
+  "routes": [
+    {"pattern": "ebtp.hukoubook.com/*", "zone_name": "hukoubook.com"}
+  ]
 }
