@@ -82,7 +82,7 @@ async function resolveInstance(at_did) {
 	if (at_did.startsWith('did:plc:')) {
 		did_uri = `https://plc.directory/${at_did}`
 	} else {
-		did_uri = `${at_did.slice('did:web:'.length)}/.well-known/did.json`
+		did_uri = `https://${at_did.slice('did:web:'.length)}/.well-known/did.json`
 	}
 
 	let response = await fetch(did_uri)
