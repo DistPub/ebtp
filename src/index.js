@@ -8,9 +8,9 @@ export default {
 		}
 		switch (url.pathname) {
 			case '/go':
-				return await go(url.searchParams.get('u'))
+				return await go(env, url.searchParams.get('u'))
 			case '/data':
-				let data = await getData(url.searchParams.get('id'), url.searchParams.get('rkey'))
+				let data = await getData(env, url.searchParams.get('id'), url.searchParams.get('rkey'))
 				return new Response(JSON.stringify(data), {
 					headers: {
 						'content-type': 'application/json'
@@ -22,11 +22,11 @@ export default {
 	},
 };
 
-async function getData(id, rkey) {
+async function getData(env, id, rkey) {
 	if (!id || !rkey) return { error: 'BadParams', message: `bad params`}
 	let profile = await getProfile(id)
 	let {did, handle} = profile
-	let instance = await resolveInstance(did)
+	let instance = await resolveInstance(env, did)
 
 	let params = {repo: did, collection: 'app.bsky.feed.post', rkey}
 	let result = await xrpc(instance, 'com.atproto.repo.getRecord', { params })
@@ -49,11 +49,11 @@ async function getProfile(id) {
 	return await xrpc('public.api.bsky.app', 'app.bsky.actor.getProfile', {params: {actor: id}})
 }
 
-async function go(postAt) {
+async function go(env, postAt) {
 	let [id, _, rkey] = postAt.slice('at://'.length).split('/')
 	let profile = await getProfile(id)
 	let {did, handle} = profile
-	let instance = await resolveInstance(did)
+	let instance = await resolveInstance(env, did)
 	let gate = await currentEBTPGate(instance, did)
 	let uri = `/blog/${handle}/${rkey}`
 	if (gate) {
@@ -77,7 +77,7 @@ function convertStringToTemplate(templateString, context) {
 	});
 }
 
-async function resolveInstance(at_did) {
+async function resolveInstance(env, at_did) {
 	let did_uri = undefined
 	if (at_did.startsWith('did:plc:')) {
 		did_uri = `https://plc.directory/${at_did}`
@@ -85,7 +85,15 @@ async function resolveInstance(at_did) {
 		did_uri = `https://${at_did.slice('did:web:'.length)}/.well-known/did.json`
 	}
 
-	let response = await fetch(did_uri)
+	let response = undefined
+
+	// special for hukoubook user
+	if (did_uri.endsWith('.hukoubook.com/.well-known/did.json')) {
+		response = await env.nginx.fetch(new Request(did_uri))
+	} else {
+		response = await fetch(did_uri)
+	}
+
 	let result = await response.json()
 	for (let service of result.service) {
 		if (service.id === '#atproto_pds') {

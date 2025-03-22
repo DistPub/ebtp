@@ -14,5 +14,11 @@
   },
   "routes": [
     {"pattern": "ebtp.hukoubook.com/*", "zone_name": "hukoubook.com"}
+  ],
+  "services": [
+    {
+      "binding": "nginx",
+      "service": "nginx"
+    }
   ]
 }
