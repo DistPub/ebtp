@@ -365,7 +365,7 @@ export class BlueskyComments extends HTMLElement {
       });
     } else {
       this.shadowRoot.querySelector(".comments").innerHTML =
-          `<p>Be the first to <a href="${instance}/profile/${this.did}/post/${this.rkey}">comment</a>.</p>`;
+          `<p>成为第一个评论的用户，抢<a href="https://${instance}/profile/${this.did}/post/${this.rkey}">沙发🛋</a></p>`;
     }
   }
 
