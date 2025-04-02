@@ -20,5 +20,9 @@
       "binding": "nginx",
       "service": "nginx"
     }
-  ]
+  ],
+  "vars": {
+    "API_HOST": "api.hukoubook.com",
+    "CDN_HOST": "cdn.bsky.app"
+  }
 }
