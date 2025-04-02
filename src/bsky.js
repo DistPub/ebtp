@@ -9,8 +9,8 @@ export async function handleRequest(request, env, ctx) {
   url.port = ''
 
   if (url.host === 'api.hukoubook.com') {
-		return env.blueskyapi.fetch(new Request(url.toString()))
+		return env.blueskyapi.fetch(new Request(url.toString(), request))
 	} else {
-    return fetch(new Request(url.toString()))
+    return fetch(new Request(url.toString(), request))
   }
 }
