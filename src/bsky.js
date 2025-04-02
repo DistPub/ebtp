@@ -8,5 +8,9 @@ export async function handleRequest(request, env, ctx) {
   url.protocol = 'https:'
   url.port = ''
 
-  return fetch(new Request(url.toString()))
+  if (url.host === 'api.hukoubook.com') {
+		return env.blueskyapi.fetch(new Request(url.toString()))
+	} else {
+    return fetch(new Request(url.toString()))
+  }
 }

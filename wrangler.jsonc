@@ -19,6 +19,10 @@
     {
       "binding": "nginx",
       "service": "nginx"
+    },
+    {
+      "binding": "blueskyapi",
+      "service": "blueskyapi"
     }
   ],
   "vars": {
