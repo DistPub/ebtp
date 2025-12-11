@@ -17,16 +17,8 @@
   ],
   "services": [
     {
-      "binding": "nginx",
-      "service": "nginx"
-    },
-    {
-      "binding": "blueskyapi",
-      "service": "blueskyapi"
+      "binding": "fatesky",
+      "service": "fatesky"
     }
-  ],
-  "vars": {
-    "API_HOST": "api.hukoubook.com",
-    "CDN_HOST": "cdn.bsky.app"
-  }
+  ]
 }
