@@ -49,7 +49,7 @@ async function go(env, postAt) {
 	let uri = `/blog/${handle}/${rkey}`
 	if (gate) {
 		let gate_url = new URL(gate)
-		if (gate_url.host !== 'ebtp.hukoubook.com' || gate_url.pathname !== 'go')
+		if (gate_url.host !== 'ebtp.hukoubook.com' || gate_url.pathname !== '/go')
 			uri = convertStringToTemplate(gate, {postAt, did, handle, rkey})
 	}
 	return new Response(`<html><head><meta http-equiv="refresh" content="0; URL='${uri}'" /><style>:root { color-scheme: light dark; }</style></head></html>`, {
